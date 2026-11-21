@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Copyright (c) 2025 Jema Technology.
+# Copyright (c) 2025 Wings8 Technology.
 # =============================================================================
-# rEFInd USB Installation Script for JemaOS
+# rEFInd USB Installation Script for Wings8OS
 # =============================================================================
-# This script installs rEFInd bootloader on a USB device with JemaOS 
+# This script installs rEFInd bootloader on a USB device with Wings8OS 
 # It creates a new 13th partition for rEFInd and configures auto-detection
-# of installed OS plus JemaOS from the USB device
+# of installed OS plus Wings8OS from the USB device
 
 # Configuration Variables (Edit these as needed)
 # =============================================================================
@@ -23,10 +23,10 @@ REFIND_DOWNLOAD_URL="https://netix.dl.sourceforge.net/project/refind/${REFIND_VE
 
 # Theme Repository Options (uncomment one to use a custom theme)
 # THEME_REPOSITORY=""
-# THEME_REPOSITORY="git@github.com:JemaOS/jemaos-refind-theme.git"
+# THEME_REPOSITORY="git@github.com:Wings8-Tech/wings8os-refind-theme.git"
 THEME_REPOSITORY="https://github.com/Pr0cella/rEFInd-glassy.git"
 # THEME_REPOSITORY="https://github.com/bobafetthotmail/refind-theme-regular.git"
-# THEME_REPOSITORY="/home/ranjith/jemaos/r114/git_clones/jemaos-refind-theme"
+# THEME_REPOSITORY="/home/ranjith/wings8os/r114/git_clones/wings8os-refind-theme"
 
 
 
@@ -41,24 +41,24 @@ REFIND_PARTITION_SIZE_MB=128  # Note: for debug logs I have doubled the size
 REFIND_PARTITION_SIZE=$((REFIND_PARTITION_SIZE_MB * 2048))  # Auto-calculated sectors
 
 REFIND_PARTITION_LABEL="REFIND"
-CHROMEOS_PARTITION_NUMBER=12  # JemaOS EFI partition number
+CHROMEOS_PARTITION_NUMBER=12  # Wings8OS EFI partition number
 
 
 # =============================================================================
-# JemaOS Partition Label
+# Wings8OS Partition Label
 # =============================================================================
-# This label is used for the JemaOS partition (partition 12)
+# This label is used for the Wings8OS partition (partition 12)
 # It will be updated to match the FAT filesystem label used by rEFInd
 # The label will be set to a FAT-compatible format during execution
 # FAT Label Constraints:
 # Max 11 characters: FAT labels have a limit
 # No spaces: Spaces are converted to underscores
 # Uppercase: Converted to uppercase for consistency
-# Example: "JEMAOS" → "JEMAOS", "Jema OS" → "JEMA_OS"
+# Example: "WINGS8OS" → "WINGS8OS", "Wings8 OS" → "WINGS8_OS"
 
-JEMAOS_PARTITION_LABEL="JEMAOS"  
+WINGS8OS_PARTITION_LABEL="WINGS8OS"  
 
-# JemaOS partition label (will be updated to match FAT label)
+# Wings8OS partition label (will be updated to match FAT label)
 FAT_LABEL=""  # Will be set during execution
 
 # Exit on any error
@@ -121,7 +121,7 @@ if [ -z "$USB_DEVICE" ]; then
     exit 1
 fi
 
-# Verify the USB device exists and has JemaOS structure
+# Verify the USB device exists and has Wings8OS structure
 if [ ! -b "$USB_DEVICE" ]; then
     echo "❌ Error: Device $USB_DEVICE does not exist or is not a block device"
     exit 1
@@ -202,15 +202,15 @@ trap cleanup EXIT
 mkdir -p "$MOUNT_DIR"
 
 # =============================================================================
-# Step 1: Verify JemaOS structure
+# Step 1: Verify Wings8OS structure
 # =============================================================================
-echo "🔍 Verifying JemaOS structure..."
+echo "🔍 Verifying Wings8OS structure..."
 
 # Check if partition 12 exists and is EFI type
 CHROMEOS_EFI_PARTITION="${USB_DEVICE}${CHROMEOS_PARTITION_NUMBER}"
 if [ ! -b "$CHROMEOS_EFI_PARTITION" ]; then
-    echo "❌ Error: JemaOS EFI partition $CHROMEOS_EFI_PARTITION not found"
-    echo "💡 Expected JemaOS with 12 partitions, partition 12 containing GRUB"
+    echo "❌ Error: Wings8OS EFI partition $CHROMEOS_EFI_PARTITION not found"
+    echo "💡 Expected Wings8OS with 12 partitions, partition 12 containing GRUB"
     exit 1
 fi
 
@@ -218,35 +218,35 @@ fi
 EFI_INFO=$(fdisk -l "$USB_DEVICE" | grep "$CHROMEOS_EFI_PARTITION" | grep -i "EFI\|ef00")
 if [ -z "$EFI_INFO" ]; then
     echo "❌ Error: Partition 12 is not an EFI System Partition"
-    echo "💡 Expected JemaOS EFI partition with GRUB bootloader"
+    echo "💡 Expected Wings8OS EFI partition with GRUB bootloader"
     exit 1
 fi
 
-echo "✅ Found JemaOS EFI partition: $CHROMEOS_EFI_PARTITION"
+echo "✅ Found Wings8OS EFI partition: $CHROMEOS_EFI_PARTITION"
 
 # =============================================================================
-# Step 2: Update partition 12 labels (GPT and FAT) to match JEMAOS_PARTITION_LABEL
+# Step 2: Update partition 12 labels (GPT and FAT) to match WINGS8OS_PARTITION_LABEL
 # =============================================================================
-echo "🏷️  Updating partition 12 labels to '$JEMAOS_PARTITION_LABEL'..."
+echo "🏷️  Updating partition 12 labels to '$WINGS8OS_PARTITION_LABEL'..."
 
 # First update the GPT partition label (what disk utilities show)
 echo "📝 Updating GPT partition label..."
-sgdisk -c ${CHROMEOS_PARTITION_NUMBER}:"$JEMAOS_PARTITION_LABEL" "$USB_DEVICE" || {
+sgdisk -c ${CHROMEOS_PARTITION_NUMBER}:"$WINGS8OS_PARTITION_LABEL" "$USB_DEVICE" || {
     echo "⚠️  Warning: Failed to update GPT partition label with sgdisk"
 }
 
 # Then update the FAT filesystem label (what rEFInd reads)
 echo "📝 Updating FAT filesystem label..."
 if command -v fatlabel >/dev/null 2>&1; then
-    # Check if JEMAOS_PARTITION_LABEL is FAT-compatible (max 11 chars, no spaces)
-    if [ ${#JEMAOS_PARTITION_LABEL} -le 11 ] && [[ "$JEMAOS_PARTITION_LABEL" != *" "* ]]; then
+    # Check if WINGS8OS_PARTITION_LABEL is FAT-compatible (max 11 chars, no spaces)
+    if [ ${#WINGS8OS_PARTITION_LABEL} -le 11 ] && [[ "$WINGS8OS_PARTITION_LABEL" != *" "* ]]; then
         # Use the same label for both GPT and FAT
-        FAT_LABEL="$JEMAOS_PARTITION_LABEL"
+        FAT_LABEL="$WINGS8OS_PARTITION_LABEL"
         echo "📋 Using same label for both GPT and FAT: '$FAT_LABEL'"
     else
         # Create a FAT-compatible version
-        FAT_LABEL=$(echo "$JEMAOS_PARTITION_LABEL" | tr ' ' '_' | cut -c1-11 | tr '[:lower:]' '[:upper:]')
-        echo "📋 Created FAT-compatible label: '$FAT_LABEL' (from '$JEMAOS_PARTITION_LABEL')"
+        FAT_LABEL=$(echo "$WINGS8OS_PARTITION_LABEL" | tr ' ' '_' | cut -c1-11 | tr '[:lower:]' '[:upper:]')
+        echo "📋 Created FAT-compatible label: '$FAT_LABEL' (from '$WINGS8OS_PARTITION_LABEL')"
     fi
     
     fatlabel "${USB_DEVICE}${CHROMEOS_PARTITION_NUMBER}" "$FAT_LABEL" || {
@@ -256,7 +256,7 @@ if command -v fatlabel >/dev/null 2>&1; then
 else
     echo "⚠️  fatlabel not found, FAT filesystem label not updated"
     echo "💡 rEFInd may still show the old filesystem label"
-    FAT_LABEL="$JEMAOS_PARTITION_LABEL"  # Set for display purposes
+    FAT_LABEL="$WINGS8OS_PARTITION_LABEL"  # Set for display purposes
 fi
 
 # Refresh partition table after label changes
@@ -264,10 +264,10 @@ partprobe "$USB_DEVICE"
 sleep 4
 
 echo "✅ Updated partition 12 labels:"
-if [ "$JEMAOS_PARTITION_LABEL" = "$FAT_LABEL" ]; then
-    echo "   - Both GPT and FAT labels: '$JEMAOS_PARTITION_LABEL'"
+if [ "$WINGS8OS_PARTITION_LABEL" = "$FAT_LABEL" ]; then
+    echo "   - Both GPT and FAT labels: '$WINGS8OS_PARTITION_LABEL'"
 else
-    echo "   - GPT partition label: '$JEMAOS_PARTITION_LABEL'"
+    echo "   - GPT partition label: '$WINGS8OS_PARTITION_LABEL'"
     echo "   - FAT filesystem label: '$FAT_LABEL' (for rEFInd compatibility)"
 fi
 
@@ -277,17 +277,17 @@ fi
 if [ "$GRUB_TIMEOUT_MODE" = "true" ]; then
     echo "⚙️  Updating GRUB configuration in partition 12 (timeout=${GRUB_TIMEOUT_VALUE}s)..."
 
-    # Mount the JemaOS EFI partition (partition 12)
-    JEMAOS_MOUNT_POINT="$MOUNT_DIR/jemaos"
-    mkdir -p "$JEMAOS_MOUNT_POINT"
-    mount "$CHROMEOS_EFI_PARTITION" "$JEMAOS_MOUNT_POINT" || {
-        echo "⚠️  Warning: Failed to mount JemaOS EFI partition"
+    # Mount the Wings8OS EFI partition (partition 12)
+    WINGS8OS_MOUNT_POINT="$MOUNT_DIR/wings8os"
+    mkdir -p "$WINGS8OS_MOUNT_POINT"
+    mount "$CHROMEOS_EFI_PARTITION" "$WINGS8OS_MOUNT_POINT" || {
+        echo "⚠️  Warning: Failed to mount Wings8OS EFI partition"
         echo "💡 Continuing without GRUB configuration update"
     }
 
-    if mountpoint -q "$JEMAOS_MOUNT_POINT" 2>/dev/null; then
+    if mountpoint -q "$WINGS8OS_MOUNT_POINT" 2>/dev/null; then
         # Check if grub.cfg exists
-        GRUB_CONFIG_PATH="$JEMAOS_MOUNT_POINT/efi/boot/grub.cfg"
+        GRUB_CONFIG_PATH="$WINGS8OS_MOUNT_POINT/efi/boot/grub.cfg"
         if [ -f "$GRUB_CONFIG_PATH" ]; then
             echo "📋 Found GRUB configuration: $GRUB_CONFIG_PATH"
             
@@ -311,15 +311,15 @@ if [ "$GRUB_TIMEOUT_MODE" = "true" ]; then
             echo "⚠️  GRUB configuration not found: $GRUB_CONFIG_PATH"
             echo "💡 Expected path: /efi/boot/grub.cfg"
             echo "📋 Available files in /efi/boot/:"
-            ls -la "$JEMAOS_MOUNT_POINT/efi/boot/" 2>/dev/null || echo "   Directory not found"
+            ls -la "$WINGS8OS_MOUNT_POINT/efi/boot/" 2>/dev/null || echo "   Directory not found"
         fi
         
-        # Unmount the JemaOS partition
-        umount "$JEMAOS_MOUNT_POINT" || {
-            echo "⚠️  Warning: Failed to unmount JemaOS partition"
+        # Unmount the Wings8OS partition
+        umount "$WINGS8OS_MOUNT_POINT" || {
+            echo "⚠️  Warning: Failed to unmount Wings8OS partition"
         }
     else
-        echo "⚠️  JemaOS partition not mounted, skipping GRUB configuration update"
+        echo "⚠️  Wings8OS partition not mounted, skipping GRUB configuration update"
     fi
 
     echo "✅ GRUB configuration update completed"
@@ -369,10 +369,10 @@ if [ $END_SECTOR -gt $TOTAL_SECTORS ]; then
     exit 1
 fi
 
-# Validate partition number is reasonable (should be 13 for JemaOS)
+# Validate partition number is reasonable (should be 13 for Wings8OS)
 if [ $NEW_PARTITION_NUM -gt 128 ] || [ $NEW_PARTITION_NUM -lt 13 ]; then
     echo "❌ Error: Invalid partition number detected: $NEW_PARTITION_NUM"
-    echo "💡 Expected partition 13 for JemaOS with 12 existing partitions"
+    echo "💡 Expected partition 13 for Wings8OS with 12 existing partitions"
     echo "💡 Current partitions:"
     fdisk -l "$USB_DEVICE" | grep "^$USB_DEVICE"
     exit 1
@@ -526,7 +526,7 @@ else
 fi
 
 # =============================================================================
-# Step 7: Mount rEFInd partition and install files (rEFInd, theme, JemaOS icon)
+# Step 7: Mount rEFInd partition and install files (rEFInd, theme, Wings8OS icon)
 # =============================================================================
 echo "🔧 Configuring rEFInd installation..."
 
@@ -581,14 +581,14 @@ else
     ICON_PATH="icons"
 fi
 
-# Copy JemaOS icon to icons directory (works for both custom themes and default icons)
-JEMAOS_ICON_SOURCE="$REFIND_TEMPLATES_DIR/os_jemaos.png"
-if [ -f "$JEMAOS_ICON_SOURCE" ]; then
-    echo "📋 Copying JemaOS icon to icons directory..."
-    cp "$JEMAOS_ICON_SOURCE" "$REFIND_MOUNT_POINT/EFI/BOOT/icons/os_jemaos.png"
-    echo "✅ JemaOS icon copied to icons directory"
+# Copy Wings8OS icon to icons directory (works for both custom themes and default icons)
+WINGS8OS_ICON_SOURCE="$REFIND_TEMPLATES_DIR/os_wings8os.png"
+if [ -f "$WINGS8OS_ICON_SOURCE" ]; then
+    echo "📋 Copying Wings8OS icon to icons directory..."
+    cp "$WINGS8OS_ICON_SOURCE" "$REFIND_MOUNT_POINT/EFI/BOOT/icons/os_wings8os.png"
+    echo "✅ Wings8OS icon copied to icons directory"
 else
-    echo "⚠️  JemaOS icon not found at: $JEMAOS_ICON_SOURCE"
+    echo "⚠️  Wings8OS icon not found at: $WINGS8OS_ICON_SOURCE"
 fi
 
  
@@ -620,7 +620,7 @@ echo "   REFIND_LOG_LEVEL: $REFIND_LOG_LEVEL"
 sed -i "s|\$THEME_CONFIG|$THEME_CONFIG|g" "$REFIND_MOUNT_POINT/EFI/BOOT/refind.conf"
 sed -i "s|\$REFIND_TIMEOUT|$REFIND_TIMEOUT|g" "$REFIND_MOUNT_POINT/EFI/BOOT/refind.conf"
 sed -i "s|\$CHROMEOS_PARTITION_NUMBER|$CHROMEOS_PARTITION_NUMBER|g" "$REFIND_MOUNT_POINT/EFI/BOOT/refind.conf"
-sed -i "s|\$JEMAOS_PARTITION_LABEL|$JEMAOS_PARTITION_LABEL|g" "$REFIND_MOUNT_POINT/EFI/BOOT/refind.conf"
+sed -i "s|\$WINGS8OS_PARTITION_LABEL|$WINGS8OS_PARTITION_LABEL|g" "$REFIND_MOUNT_POINT/EFI/BOOT/refind.conf"
 
 sed -i "s|\$REFIND_LOG_LEVEL|$REFIND_LOG_LEVEL|g" "$REFIND_MOUNT_POINT/EFI/BOOT/refind.conf"
 
@@ -654,7 +654,7 @@ umount "$REFIND_MOUNT_POINT"
 # =============================================================================
 if [ "$DEBUG_MODE" -eq 1 ]; then
     echo "🐞 Debug mode: copying partition 12 and 13 contents to $WORK_DIR for inspection..."
-    # Partition 12 (JemaOS EFI)
+    # Partition 12 (Wings8OS EFI)
     PART12_MOUNT="$WORK_DIR/part12_mount"
     mkdir -p "$PART12_MOUNT"
     mount "${USB_DEVICE}${CHROMEOS_PARTITION_NUMBER}" "$PART12_MOUNT" 2>/dev/null && \
@@ -685,11 +685,11 @@ echo "rEFInd Version: $REFIND_VERSION"
 echo "rEFInd Partition: $NEW_PARTITION (Partition $NEW_PARTITION_NUM)"
 echo "Partition Size: ${REFIND_PARTITION_SIZE_MB}MB (${REFIND_PARTITION_SIZE} sectors)"
 echo "Partition Label: $REFIND_PARTITION_LABEL"
-echo "JemaOS Partition: ${USB_DEVICE}${CHROMEOS_PARTITION_NUMBER}"
-if [ "$JEMAOS_PARTITION_LABEL" = "$FAT_LABEL" ]; then
-    echo "   - Label: '$JEMAOS_PARTITION_LABEL' (both GPT and FAT)"
+echo "Wings8OS Partition: ${USB_DEVICE}${CHROMEOS_PARTITION_NUMBER}"
+if [ "$WINGS8OS_PARTITION_LABEL" = "$FAT_LABEL" ]; then
+    echo "   - Label: '$WINGS8OS_PARTITION_LABEL' (both GPT and FAT)"
 else
-    echo "   - GPT Label: '$JEMAOS_PARTITION_LABEL'"
+    echo "   - GPT Label: '$WINGS8OS_PARTITION_LABEL'"
     echo "   - FAT Label: '$FAT_LABEL' (displayed in rEFInd)"
 fi
 echo "Boot Timeout: ${REFIND_TIMEOUT} seconds"
@@ -741,7 +741,7 @@ echo "1. Insert the USB device into target computer"
 echo "2. Boot from USB device (may require changing boot order in BIOS/UEFI)"
 echo "3. Select the 13th partition (rEFInd) in the boot menu"
 echo "4. rEFInd will automatically start and show available OS options"
-echo "5. Select 'Jema OS' to boot from the USB device"
+echo "5. Select 'Wings8 OS' to boot from the USB device"
 echo "6. Or select other detected operating systems from the menu"
 echo ""
 echo "⚙️  ADVANCED rEFInd OPTIONS:"
@@ -754,7 +754,7 @@ echo ""
 echo "🔍 TROUBLESHOOTING:"
 echo "=================================================="
 echo "• If rEFInd doesn't start: Check UEFI boot order and Secure Boot settings"
-echo "• If JemaOS doesn't appear: Verify partition 12 contains valid GRUB installation"
+echo "• If Wings8OS doesn't appear: Verify partition 12 contains valid GRUB installation"
 echo "• If custom theme missing: Check theme files in /EFI/BOOT/themes/$THEME_NAME/"
 echo "• For boot issues: Check startup.nsh and refind.conf syntax"
 echo "• For debugging: Enable DEBUG_MODE=1 in script for verbose logs and partition copies"
@@ -764,7 +764,7 @@ echo "=================================================="
 echo "Installation completed at: $(date)"
 if [ "$DEBUG_MODE" -eq 1 ]; then
     echo "Work directory (DEBUG): $WORK_DIR (preserved for inspection)"
-    echo "Partition 12 copy: $WORK_DIR/partition12_copy (JemaOS EFI)"
+    echo "Partition 12 copy: $WORK_DIR/partition12_copy (Wings8OS EFI)"
     echo "Partition 13 copy: $WORK_DIR/partition13_copy (rEFInd)"
     echo "Theme files: sudo ls -la $WORK_DIR/partition13_copy/EFI/BOOT/themes/"
 else

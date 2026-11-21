@@ -1,6 +1,6 @@
-# JemaOS rEFInd USB Installer
+# Wings8OS rEFInd USB Installer
 
-A comprehensive script to add the rEFInd bootloader to JemaOS USB devices, enabling multi-boot capabilities and improved boot management.
+A comprehensive script to add the rEFInd bootloader to Wings8OS USB devices, enabling multi-boot capabilities and improved boot management.
 
 ## how to use 
 1. Flash with usb with cros_sdk -> Flash command 
@@ -8,14 +8,14 @@ A comprehensive script to add the rEFInd bootloader to JemaOS USB devices, enabl
 
 ## Overview
 
-This script installs rEFInd bootloader on a USB device that already has JemaOS flashed, creating a new 13th partition for rEFInd and configuring automatic detection of installed operating systems plus JemaOS from the USB device.
+This script installs rEFInd bootloader on a USB device that already has Wings8OS flashed, creating a new 13th partition for rEFInd and configuring automatic detection of installed operating systems plus Wings8OS from the USB device.
 
 ## Features
 
 - ✅ **Automatic Partition Management**: Creates a new 13th partition for rEFInd
 - ✅ **Theme Support**: Supports custom rEFInd themes (local or remote Git repositories)
-- ✅ **JemaOS Integration**: Automatically configures JemaOS boot entry with custom icon
-- ✅ **GRUB Configuration**: Updates JemaOS GRUB timeout to 0 for seamless rEFInd experience
+- ✅ **Wings8OS Integration**: Automatically configures Wings8OS boot entry with custom icon
+- ✅ **GRUB Configuration**: Updates Wings8OS GRUB timeout to 0 for seamless rEFInd experience
 - ✅ **Partition Label Management**: Updates both GPT and FAT labels for better identification
 - ✅ **Debug Mode**: Comprehensive debugging with partition content preservation
 - ✅ **Robust Error Handling**: Advanced partition table refresh and error 
@@ -24,7 +24,7 @@ This script installs rEFInd bootloader on a USB device that already has JemaOS f
 ## Prerequisites
 
 - **Root access** (script must be run as root)
-- **JemaOS USB device** with existing 12-partition structure
+- **Wings8OS USB device** with existing 12-partition structure
 - **Required tools**: `sgdisk`, `mkfs.vfat`, `wget`, `unzip`, `git` (for remote themes)
 - **Optional tools**: `fatlabel` (for FAT filesystem label updates)
 
@@ -34,8 +34,8 @@ This script installs rEFInd bootloader on a USB device that already has JemaOS f
 
 ```bash
 # Clone the repository
-git clone https://github.com/JemaOS/jemaos-refind-usb-installer.git
-cd jemaos-refind-usb-installer
+git clone https://github.com/Wings8-Tech/wings8os-refind-usb-installer.git
+cd wings8os-refind-usb-installer
 
 # Make script executable
 chmod +x add_refind_to_usb.sh
@@ -67,7 +67,7 @@ REFIND_PARTITION_SIZE_MB=128  # rEFInd partition size in MB
 
 # Partition labels
 REFIND_PARTITION_LABEL="REFIND"
-JEMAOS_PARTITION_LABEL="JEMAOS"
+WINGS8OS_PARTITION_LABEL="WINGS8OS"
 ```
 
 ## Usage
@@ -95,13 +95,13 @@ sudo ./add_refind_to_usb.sh --device /dev/sdX
 
 ### Step-by-Step Process
 
-1. **Verification**: Checks JemaOS structure and validates partition 12 (EFI)
+1. **Verification**: Checks Wings8OS structure and validates partition 12 (EFI)
 2. **Label Updates**: Updates partition 12 labels (both GPT and FAT) for better identification
 3. **GRUB Configuration**: Sets GRUB timeout to 0 seconds in partition 12
 4. **Partition Creation**: Creates 13th partition (128MB) for rEFInd
 5. **rEFInd Installation**: Downloads and installs rEFInd v0.14.2
 6. **Theme Installation**: Installs custom theme (if configured)
-7. **Icon Integration**: Copies JemaOS icon for proper OS detection
+7. **Icon Integration**: Copies Wings8OS icon for proper OS detection
 8. **Configuration**: Generates rEFInd configuration with variable substitution
 9. **Auto-boot Setup**: Installs startup.nsh for UEFI auto-boot
 10. **Debug Copying**: (Debug mode) Preserves partition contents for inspection
@@ -110,13 +110,13 @@ sudo ./add_refind_to_usb.sh --device /dev/sdX
 
 ```
 USB Device
-├── Partitions 1-12 (JemaOS original structure)
+├── Partitions 1-12 (Wings8OS original structure)
 └── Partition 13 (rEFInd)
     ├── EFI/
     │   └── BOOT/
     │       ├── bootx64.efi (rEFInd bootloader)
     │       ├── refind.conf (configuration)
-    │       ├── icons/ (including os_jemaos.png)
+    │       ├── icons/ (including os_wings8os.png)
     │       └── themes/ (custom theme if installed)
     └── startup.nsh (UEFI auto-boot script)
 ```
@@ -143,12 +143,12 @@ THEME_REPOSITORY="https://github.com/Pr0cella/rEFInd-glassy.git"
 
 1. **UEFI Boot**: System boots from USB device
 2. **OS Detection**: rEFInd scans for available operating systems
-3. **Menu Display**: Shows JemaOS and other detected OS options
+3. **Menu Display**: Shows Wings8OS and other detected OS options
 4. **OS Selection**: User selects desired operating system
 
 ### Boot Options Available
 
-- **JemaOS**: Boots from partition 12 (USB device)
+- **Wings8OS**: Boots from partition 12 (USB device)
 - **Detected OS**: Any other operating systems found on the system
 
 ## Troubleshooting
@@ -157,7 +157,7 @@ THEME_REPOSITORY="https://github.com/Pr0cella/rEFInd-glassy.git"
 
 #### Boot Problems
 - **rEFInd doesn't start**: Check UEFI boot order and Secure Boot settings
-- **JemaOS missing**: Verify partition 12 contains valid GRUB installation 
+- **Wings8OS missing**: Verify partition 12 contains valid GRUB installation 
 
 #### Debug Mode
 ```bash
@@ -170,7 +170,7 @@ REFIND_LOG_LEVEL=1 (0-4)
 
 When `DEBUG_MODE=1`, the script preserves:
 - Work directory with all downloaded/extracted files
-- Complete copy of partition 12 (JemaOS EFI)
+- Complete copy of partition 12 (Wings8OS EFI)
 - Complete copy of partition 13 (rEFInd)
 - Verbose logging and detailed error information
 
@@ -191,14 +191,14 @@ The script handles FAT label compatibility:
 - **32-bit architecture** (included but less tested)
 
 ### USB Device Requirements
-- **JemaOS pre-installed** with 12-partition structure
+- **Wings8OS pre-installed** with 12-partition structure
 - **Minimum 128MB free space** for rEFInd partition
 
 ## License
 
-Copyright (c) 2025 Jema Technology.
+Copyright (c) 2025 Wings8 Technology.
 
 
 ---
 
-**Note**: This script is designed for JemaOS USB devices and may not work with other ChromeOS-based systems.
+**Note**: This script is designed for Wings8OS USB devices and may not work with other ChromeOS-based systems.
